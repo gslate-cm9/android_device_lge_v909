@@ -47,6 +47,9 @@ PRODUCT_COPY_FILES += \
      $(LOCAL_PATH)/gps.xml:system/etc/gps.xml \
      $(LOCAL_PATH)/gps.conf:system/etc/gps.conf
 
+PRODUCT_COPY_FILES += \
+     $(LOCAL_PATH)/tiny_hw.xml:/system/etc/sound/startablet.xml
+
 PRODUCT_PROPERTY_OVERRIDES := \
     wifi.interface=wlan0 \
     wifi.supplicant_scan_interval=15
@@ -82,6 +85,8 @@ PRODUCT_COPY_FILES += \
 ## LGE stuffs
 PRODUCT_PACKAGES += \
     LGEServices \
+    audio.primary.startablet \
+    libaudioutils \
     bridgeutil \
     libbridges \
     libbridge \

@@ -34,10 +34,7 @@ etc/wifi/config
 etc/wifi/nvram.txt
 lib/hw/gps.startablet.so
 lib/hw/sensors.startablet.so
-lib/hw/tegra_alsa.startablet.so
 lib/lge-ril.so
-lib/libaudio.so
-lib/libaudiopolicy.so
 lib/libbcmwl.so
 lib/libblueset.so
 lib/libcamera.so
