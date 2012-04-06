@@ -1,3 +1,5 @@
+$(call inherit-product, build/target/product/full_base.mk)
+
 # The gps config appropriate for this device
 $(call inherit-product, device/common/gps/gps_us_supl.mk)
 
@@ -80,8 +82,6 @@ PRODUCT_COPY_FILES += \
     frameworks/base/data/etc/tablet_core_hardware.xml:system/etc/permissions/tablet_core_hardware.xml \
     frameworks/base/data/etc/android.hardware.sensor.proximity.xml:system/etc/permissions/android.hardware.sensor.proximity.xml \
     packages/wallpapers/LivePicker/android.software.live_wallpaper.xml:system/etc/permissions/android.software.live_wallpaper.xml
-
-$(call inherit-product, build/target/product/full_base.mk)
 
 ## LGE stuffs
 PRODUCT_PACKAGES += \
