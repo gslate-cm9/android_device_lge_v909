@@ -23,6 +23,7 @@ on init
     write /sys/class/android_usb/android0/iProduct $ro.product.model
 
     write /proc/boot_cmd ""
+    write /proc/nvdata/FRST_FLAG 0
 
 on boot
 
