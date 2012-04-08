@@ -16,6 +16,9 @@ on init
 
     mount tmpfs tmpfs /tmp
 
+    mount debugfs debugfs /sys/kernel/debug
+    symlink /sys/kernel/debug /d
+
     write /sys/class/android_usb/android0/iSerial $ro.serialno
     write /sys/class/android_usb/android0/iManufacturer $ro.product.manufacturer
     write /sys/class/android_usb/android0/iProduct $ro.product.model
