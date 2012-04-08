@@ -40,11 +40,14 @@ lib/hw/tegra_alsa.startablet.so
 lib/lge-ril.so
 lib/libaudio.so
 lib/libaudiopolicy.so
+lib/libbcmwl.so
+lib/libblueset.so
 lib/libcamera.so
 lib/libcgdrv.so
 lib/drm/libdrmwvmplugin.so
 lib/libdrm1.so
 lib/libdrm1_jni.so
+lib/liblgerft.so
 lib/libreference-ril.so
 lib/libril.so
 framework/com.tmus.gslate.apps.jar
