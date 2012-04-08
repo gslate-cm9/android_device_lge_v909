@@ -19,10 +19,16 @@ etc/firmware/nvmm_wmadec.axf
 etc/firmware/nvmm_wmaprodec.axf
 etc/firmware/nvrm_avp.bin
 lib/egl/libEGL_tegra.so
+lib/egl/libGLES_android.so
+lib/egl/libEGL_tegra.so
 lib/egl/libGLESv1_CM_tegra.so
 lib/egl/libGLESv2_tegra.so
 lib/hw/gralloc.tegra.so
 lib/hw/hwcomposer.tegra.so
+lib/libEGL.so
+lib/libGLESv1_CM.so
+lib/libGLESv2.so
+lib/libGLESv2_dbg.so
 lib/libardrv_dynamic.so
 lib/libcgdrv.so
 lib/libnvapputil.so
