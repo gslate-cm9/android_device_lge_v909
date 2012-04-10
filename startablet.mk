@@ -33,7 +33,6 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/egl.cfg:system/lib/egl/egl.cfg \
     $(LOCAL_PATH)/prebuilt/rild:system/bin/rild \
     $(LOCAL_PATH)/wpa_supplicant.conf:data/misc/wifi/wpa_supplicant.conf \
-    $(LOCAL_PATH)/dhcpcd.conf:system/etc/dhcpcd/dhcpcd.conf
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/init.startablet.rc:root/init.startablet.rc \
