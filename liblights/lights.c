@@ -56,6 +56,12 @@ char const*const BUTTON_PULSE
 char const*const AUTO_BRIGHT_FILE
         = "/sys/devices/platform/star_aat2870.0/lsensor_onoff";
 
+char const*const NOTIFICATION_INTERVAL
+	= "/sys/devices/platform/tegra_leds/led_blink";
+
+char const*const NOTIFICATION_COLOR
+	= "/sys/devices/platform/tegra_leds/led_rgb_brightness";
+
 /**
  * device methods
  */
@@ -77,6 +83,28 @@ write_int(char const* path, int value)
     if (fd >= 0) {
         char buffer[20];
         int bytes = sprintf(buffer, "%d\n", value);
+        int amt = write(fd, buffer, bytes);
+        close(fd);
+        return amt == -1 ? -errno : 0;
+    } else {
+        if (already_warned == 0) {
+            LOGE("write_int failed to open %s\n", path);
+            already_warned = 1;
+        }
+        return -errno;
+    }
+}
+
+static int
+write_interval(char const* path, int on_time, int off_time)
+{
+    int fd;
+    static int already_warned = 0;
+
+    fd = open(path, O_RDWR);
+    if (fd >= 0) {
+        char buffer[20];
+        int bytes = sprintf(buffer, "%d %d\n", on_time, off_time);
         int amt = write(fd, buffer, bytes);
         close(fd);
         return amt == -1 ? -errno : 0;
@@ -161,28 +189,15 @@ set_light_notifications(struct light_device_t* dev,
 {
     int err = 0;
     int on = is_lit(state);
-    int red, green, blue = 0;
-
-    red = (state->color >> 16) & 0xff;
-    green = (state->color >> 8) & 0xff;
-    blue = (state->color) & 0xff;
 
     LOGV("Calling notification light with state %d",on);
     pthread_mutex_lock(&g_lock);
     if (!on) {
-        err = write_int(BUTTON_PULSE, 0);
-        err = write_int(BUTTON_STATE, 0);
+        err = write_int(NOTIFICATION_COLOR, 0);
+        err |= write_interval(NOTIFICATION_INTERVAL, 0, 0);
     } else {
-        if (green) {
-            err = write_int(BUTTON_BRIGHTNESS, 16);
-            if (!err) err = write_int(BUTTON_STATE, 1);
-        } else if (red) {
-            err = write_int(BUTTON_PULSE, 2000);
-            if (!err) err = write_int(BUTTON_PULSE_INTERVAL, 20000);
-        } else if (blue) {
-            err = write_int(BUTTON_PULSE, 1000);
-            if (!err) err = write_int(BUTTON_PULSE_INTERVAL, 3000);
-        }
+	err = write_int(NOTIFICATION_COLOR, state->color);
+	err |= write_interval(NOTIFICATION_INTERVAL, state->flashOnMS, state->flashOffMS);
     }
     pthread_mutex_unlock(&g_lock);
     return err;
