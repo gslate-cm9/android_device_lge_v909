@@ -72,6 +72,7 @@ PRODUCT_COPY_FILES += \
     frameworks/base/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml \
     frameworks/base/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
     frameworks/base/data/etc/android.software.sip.xml:system/etc/permissions/android.software.sip.xml \
+    frameworks/base/data/etc/android.hardware.location.xml:system/etc/permissions/android.hardware.location.xml \
     frameworks/base/data/etc/com.android.location.provider.xml:system/etc/permissions/com.android.location.provider.xml \
     frameworks/base/data/etc/com.google.widevine.software.drm.xml:system/etc/permissions/com.google.widevine.software.drm.xml \
     frameworks/base/data/etc/com.nvidia.display.xml:system/etc/permissions/com.nvidia.display.xml \
