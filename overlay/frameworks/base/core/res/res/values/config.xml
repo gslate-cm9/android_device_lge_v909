@@ -21,6 +21,17 @@
      for different hardware and product builds. -->
 <resources>
 
+    <!-- This device is not "voice capable"; it's data-only. -->
+    <bool name="config_voice_capable">false</bool>
+
+    <bool name="config_showNavigationBar">false</bool>
+
+    <bool name="config_sf_limitedAlpha">true</bool>
+
+    <bool name="config_allowAllRotations">true</bool>
+
+    <bool name="config_sf_slowBlur">true</bool>
+
     <!-- Flag indicating whether we should enable the automatic brightness in Settings.
          config_hardware_automatic_brightness_available is not set, so we will use software implementation -->
     <bool name="config_automatic_brightness_available">true</bool>
@@ -142,9 +153,24 @@
     <!-- Minimum screen brightness allowed by the power manager. -->
     <integer name="config_screenBrightnessDim">10</integer>
 
+    <string-array translatable="false" name="config_tether_usb_regexs">
+        <item>"rndis0"</item>
+    </string-array>
+    <string-array translatable="false" name="config_tether_bluetooth_regexs">
+        <item>"bnep\\d"</item>
+    </string-array>
+
+   <!-- Boolean indicating whether the wifi chipset has dual frequency band support -->
+    <bool translatable="false" name="config_wifi_dual_band_support">false</bool>
+
+   <!-- Boolean indicating whether the wifi chipset has background scan support -->
+   <bool translatable="false" name="config_wifi_background_scan_support">true</bool>
+
     <string name="config_networkLocationProvider">com.google.android.location.NetworkLocationProvider</string>
 
    <string name="config_geocodeProvider">com.google.android.location.GeocodeProvider</string>
+
+    <bool name="config_forceDisableHardwareKeyboard">true</bool>
 
 </resources>
 
