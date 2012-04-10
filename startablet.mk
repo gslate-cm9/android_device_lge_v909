@@ -80,7 +80,6 @@ PRODUCT_COPY_FILES += \
     frameworks/base/data/etc/com.tmus.gslate.apps.xml:system/etc/permissions/com.tmus.gslate.apps.xml \
     frameworks/base/data/etc/platform.xml:system/etc/permissions/platform.xml \
     frameworks/base/data/etc/tablet_core_hardware.xml:system/etc/permissions/tablet_core_hardware.xml \
-    frameworks/base/data/etc/android.hardware.sensor.proximity.xml:system/etc/permissions/android.hardware.sensor.proximity.xml \
     packages/wallpapers/LivePicker/android.software.live_wallpaper.xml:system/etc/permissions/android.software.live_wallpaper.xml
 
 ## LGE stuffs
