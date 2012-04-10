@@ -142,5 +142,9 @@
     <!-- Minimum screen brightness allowed by the power manager. -->
     <integer name="config_screenBrightnessDim">10</integer>
 
+    <string name="config_networkLocationProvider">com.google.android.location.NetworkLocationProvider</string>
+
+   <string name="config_geocodeProvider">com.google.android.location.GeocodeProvider</string>
+
 </resources>
 
