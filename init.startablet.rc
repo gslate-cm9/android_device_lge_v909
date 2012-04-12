@@ -236,7 +236,7 @@ service iprenew_wlan0 /system/bin/dhcpcd -n
     oneshot
 
 service hciattach /system/bin/brcm_patchram_plus_lge --enable_hci --enable_lpm --pcm_role slave  \
-    --baudrate 3000000 --patchram /system/etc/bluetooth/BCM4329B1_002.002.023.0735.0783.hcd  /dev/ttyHS2
+    --baudrate 3000000 --patchram /system/etc/bluetooth/BCM4329B1_002.002.023.0875.0883.hcd  /dev/ttyHS2
     class main
     user bluetooth
     group bluetooth net_admin system
