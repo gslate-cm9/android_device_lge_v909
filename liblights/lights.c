@@ -41,21 +41,6 @@ static struct light_state_t g_notification;
 char const*const LCD_FILE
         = "/sys/class/backlight/tegra-pwm-bl/brightness";
 
-char const*const BUTTON_BRIGHTNESS
-        = "/sys/class/leds/buttonpanel/brightness";
-
-char const*const BUTTON_STATE
-        = "/sys/class/leds/buttonpanel/enable";
-
-char const*const BUTTON_PULSE_INTERVAL
-        = "/sys/class/leds/buttonpanel/pulse_interval";
-
-char const*const BUTTON_PULSE
-        = "/sys/class/leds/buttonpanel/pulse";
-
-char const*const AUTO_BRIGHT_FILE
-        = "/sys/devices/platform/star_aat2870.0/lsensor_onoff";
-
 char const*const NOTIFICATION_INTERVAL
 	= "/sys/devices/platform/tegra_leds/led_blink";
 
@@ -148,25 +133,6 @@ rgb_to_brightness(struct light_state_t const* state)
 }
 
 static int
-set_light_buttons(struct light_device_t* dev,
-        struct light_state_t const* state)
-{
-    int err = 0;
-    int on = is_lit(state);
-    long value = rgb_to_brightness(state);
-
-    LOGV("Setting button brightness to %ld",value);
-
-    pthread_mutex_lock(&g_lock);
-    err = write_int(BUTTON_BRIGHTNESS, (int)value);
-    /*if (!err) {
-        err = write_int(BUTTON_STATE, value ? 1 : 0);
-    }*/
-    pthread_mutex_unlock(&g_lock);
-    return err;
-}
-
-static int
 set_light_backlight(struct light_device_t* dev,
         struct light_state_t const* state)
 {
@@ -179,7 +145,6 @@ set_light_backlight(struct light_device_t* dev,
     err = write_int(LCD_FILE, (brightness));
     pthread_mutex_unlock(&g_lock);
 
-    err = set_light_buttons(dev, state);
     return err;
 }
 
@@ -242,9 +207,6 @@ static int open_lights(const struct hw_module_t* module, char const* name,
 
     if (0 == strcmp(LIGHT_ID_BACKLIGHT, name)) {
         set_light = set_light_backlight;
-    }
-    else if (0 == strcmp(LIGHT_ID_BUTTONS, name)) {
-        set_light = set_light_buttons;
     }
     /*else if (0 == strcmp(LIGHT_ID_ATTENTION, name)) {
         set_light = set_light_attention;
