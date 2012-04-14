@@ -24,7 +24,6 @@ bin/RescueServer
 bin/RescueStarter
 bin/wifihiddend
 bin/wl
-etc/asound.conf
 etc/init.goldfish.sh
 etc/bluetooth/BCM4329B1_002.002.023.0875.0883.hcd
 etc/permissions/com.google.widevine.software.drm.xml
