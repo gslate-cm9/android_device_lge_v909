@@ -23,13 +23,6 @@
      <ctl name="Speaker Mixer Volume" val="1" />
      <ctl name="Speaker Boost Volume" val="4" />
 
-     <!-- DAC1->Output Mixer->Earpiece -->
-     <ctl name="Left Output Mixer DAC Switch" val="1" />
-     <ctl name="Right Output Mixer DAC Switch" val="1" />
-     <ctl name="Earpiece Mixer Left Output Switch" val="1" />
-     <ctl name="Earpiece Mixer Right Output Switch" val="1" />
-     <ctl name="Earpiece Switch" val="1" />
-
      <!-- IN1LN/P (headset mic) -> IN1L PGA with +30dB -->
      <ctl name="IN1L PGA IN1LP Switch" val="0" />
      <ctl name="IN1L PGA IN1LN Switch" val="0" />
