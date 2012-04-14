@@ -30,13 +30,13 @@
      <ctl name="Earpiece Mixer Right Output Switch" val="1" />
      <ctl name="Earpiece Switch" val="1" />
 
-     <!-- IN1LN/P (main mic) -> IN1L PGA with +30dB -->
+     <!-- IN1LN/P (headset mic) -> IN1L PGA with +30dB -->
      <ctl name="IN1L PGA IN1LP Switch" val="0" />
      <ctl name="IN1L PGA IN1LN Switch" val="0" />
      <ctl name="MIXINL IN1L Volume" val="1" />
      <ctl name="IN1L Switch" val="1" />
 
-     <!-- IN1RN/P (headset mic) -> IN1R PGA with +30dB -->
+     <!-- IN1RN/P (main mic) -> IN1R PGA with +30dB -->
      <ctl name="IN1R PGA IN1RP Switch" val="0" />
      <ctl name="IN1R PGA IN1RN Switch" val="0" />
      <ctl name="MIXINR IN1R Volume" val="1" />
@@ -66,7 +66,7 @@
    </path>
 </device>
 
-<device name="builtin-mic">
+<device name="headset">
   <path name="on">
      <ctl name="MIXINL IN1L Switch" val="1" />
   </path>
@@ -75,7 +75,7 @@
   </path>
 </device>
 
-<device name="headset">
+<device name="builtin-mic">
   <path name="on">
      <ctl name="MIXINR IN1R Switch" val="1" />
   </path>
