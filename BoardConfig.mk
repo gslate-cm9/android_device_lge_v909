@@ -25,7 +25,7 @@ DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay
 USE_CAMERA_STUB := false
 COMMON_GLOBAL_CFLAGS += -DREVERSE_FFC_MIRROR_LOGIC
 
--include vendor/lge/startablet/BoardConfigVendor.mk
+-include vendor/lge/v909/BoardConfigVendor.mk
 
 TARGET_BOARD_PLATFORM := tegra
 TARGET_CPU_ABI := armeabi
@@ -37,13 +37,11 @@ TARGET_CPU_SMP := true
 #TARGET_HAVE_TEGRA_ERRATA_657451 := true
 ARCH_ARM_HAVE_TLS_REGISTER := true
 
-#TARGET_SPECIFIC_HEADER_PATH := device/lge/startablet/include
-
 # Custom Recovery UI Settings
-BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/lge/startablet/recovery/recovery_ui.c
+BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/lge/v909/recovery/recovery_ui.c
 
 # Override recovery init.rc
-TARGET_RECOVERY_INITRC := device/lge/startablet/recovery/init.rc
+TARGET_RECOVERY_INITRC := device/lge/v909/recovery/init.rc
 
 BOARD_HAS_NO_SELECT_BUTTON := true
 BOARD_HAS_LARGE_FILESYSTEM := true
@@ -55,7 +53,7 @@ BOARD_KERNEL_BASE := 0x10000000
 BOARD_KERNEL_CMDLINE := nvmem=128M@384M mem=1024M@0M vmalloc=256M video=tegrafb console=none lp0_vec=8192@0x1879e000 tegra_fbmem=3937280@0x1f86b000 tegraboot=sdmmc muic_path=0:1b usb_mode=0 hw_rev=Rev_1_3 gpt
 BOARD_PAGE_SIZE := 0x00000800
 
-BOARD_EGL_CFG := device/lge/startablet/egl.cfg
+BOARD_EGL_CFG := device/lge/v909/egl.cfg
 
 USE_OPENGL_RENDERER := true
 
@@ -72,7 +70,7 @@ BOARD_USERDATAIMAGE_PARTITION_SIZE := 31027363840
 TARGET_USERIMAGES_USE_EXT4 := true
 BOARD_FLASH_BLOCK_SIZE := 4096
 
-TARGET_PREBUILT_KERNEL := device/lge/startablet/kernel
+TARGET_PREBUILT_KERNEL := device/lge/v909/kernel
 
 BOARD_UMS_LUNFILE := /sys/devices/platform/usb_mass_storage/lun0/file
 

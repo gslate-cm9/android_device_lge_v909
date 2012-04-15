@@ -3,9 +3,9 @@ $(call inherit-product, build/target/product/full_base.mk)
 # The gps config appropriate for this device
 $(call inherit-product, device/common/gps/gps_us_supl.mk)
 
-$(call inherit-product-if-exists, vendor/lge/startablet/startablet-vendor.mk)
+$(call inherit-product-if-exists, vendor/lge/v909/v909-vendor.mk)
 
-DEVICE_PACKAGE_OVERLAYS += device/lge/startablet/overlay
+DEVICE_PACKAGE_OVERLAYS += device/lge/v909/overlay
 
 
 ifeq ($(TARGET_PREBUILT_KERNEL),)
@@ -104,6 +104,6 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
 PRODUCT_CHARACTERISTICS := tablet,nosdcard
 
 PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=0
-PRODUCT_NAME := lge_startablet
+PRODUCT_NAME := lge_v909
 PRODUCT_DEVICE := v909
 PRODUCT_MODEL := LG-V909

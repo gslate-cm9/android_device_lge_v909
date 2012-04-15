@@ -1,4 +1,4 @@
-ifneq ($(filter p990 p999 startablet, $(TARGET_BOOTLOADER_BOARD_NAME)),)
+ifneq ($(filter startablet, $(TARGET_BOOTLOADER_BOARD_NAME)),)
 
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)

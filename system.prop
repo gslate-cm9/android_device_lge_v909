@@ -1,5 +1,5 @@
 #
-# system.prop for startablet
+# system.prop for LGE V909
 #
 ro.cwm.prefer_tar=true
 ro.opengles.version=131072

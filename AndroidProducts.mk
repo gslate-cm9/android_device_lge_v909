@@ -15,4 +15,4 @@
 #
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/startablet.mk
+    $(LOCAL_DIR)/v909.mk
