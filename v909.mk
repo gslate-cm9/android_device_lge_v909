@@ -75,12 +75,14 @@ PRODUCT_COPY_FILES += \
     frameworks/base/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml \
     frameworks/base/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
     frameworks/base/data/etc/android.software.sip.xml:system/etc/permissions/android.software.sip.xml \
-    frameworks/base/data/etc/com.google.widevine.software.drm.xml:system/etc/permissions/com.google.widevine.software.drm.xml \
     frameworks/base/data/etc/com.nvidia.display.xml:system/etc/permissions/com.nvidia.display.xml \
     frameworks/base/data/etc/com.tmus.gslate.apps.xml:system/etc/permissions/com.tmus.gslate.apps.xml \
     frameworks/base/data/etc/platform.xml:system/etc/permissions/platform.xml \
     frameworks/base/data/etc/tablet_core_hardware.xml:system/etc/permissions/tablet_core_hardware.xml \
     packages/wallpapers/LivePicker/android.software.live_wallpaper.xml:system/etc/permissions/android.software.live_wallpaper.xml
+
+PRODUCT_COPY_FILES += \
+     $(LOCAL_PATH)/permissions/com.google.widevine.software.drm.xml:system/etc/permissions/com.google.widevine.software.drm.xml
 
 ## LGE stuffs
 PRODUCT_PACKAGES += \
