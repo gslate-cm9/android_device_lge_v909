@@ -48,7 +48,7 @@ PRODUCT_COPY_FILES += \
      $(LOCAL_PATH)/gps.conf:system/etc/gps.conf
 
 PRODUCT_COPY_FILES += \
-     $(LOCAL_PATH)/tiny_hw.xml:/system/etc/sound/startablet.xml
+     $(LOCAL_PATH)/tiny_hw.xml:/system/etc/sound/v909.xml
 
 PRODUCT_PROPERTY_OVERRIDES := \
     wifi.interface=wlan0 \
