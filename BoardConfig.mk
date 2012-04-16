@@ -70,7 +70,7 @@ BOARD_USERDATAIMAGE_PARTITION_SIZE := 31027363840
 TARGET_USERIMAGES_USE_EXT4 := true
 BOARD_FLASH_BLOCK_SIZE := 4096
 
-TARGET_PREBUILT_KERNEL := device/lge/v909/kernel
+TARGET_KERNEL_CONFIG := cyanogenmod_startablet_defconfig
 
 BOARD_UMS_LUNFILE := /sys/devices/platform/usb_mass_storage/lun0/file
 

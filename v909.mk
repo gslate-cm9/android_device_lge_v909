@@ -7,26 +7,7 @@ $(call inherit-product-if-exists, vendor/lge/v909/v909-vendor.mk)
 
 DEVICE_PACKAGE_OVERLAYS += device/lge/v909/overlay
 
-
-ifeq ($(TARGET_PREBUILT_KERNEL),)
-	LOCAL_KERNEL := $(LOCAL_PATH)/kernel
-else
-	LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
-endif
-
-PRODUCT_COPY_FILES += \
-    $(LOCAL_KERNEL):kernel \
-
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/prebuilt/bcmdhd.ko:system/lib/modules/bcmdhd.ko
-
 $(call inherit-product-if-exists, hardware/broadcom/wlan/bcmdhd/firmware/bcm4329/device-bcm.mk)
-
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/prebuilt/cifs.ko:system/lib/modules/cifs.ko
-
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/prebuilt/tun.ko:system/lib/modules/tun.ko
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/media_profiles.xml:system/etc/media_profiles.xml \
