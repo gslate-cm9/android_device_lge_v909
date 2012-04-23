@@ -40,6 +40,9 @@
 #include <audio_utils/resampler.h>
 #include <hardware/audio_effect.h>
 
+#define MAX_PCM_CARDS 1
+#define MAX_PCM_DEVICES 2
+
 struct route_setting
 {
     char *ctl_name;
@@ -94,6 +97,9 @@ static int set_route_by_array(struct mixer *mixer, struct route_setting *route,
 struct tiny_dev_cfg {
     int mask;
 
+    int card;
+    int device;
+
     struct route_setting *on;
     unsigned int on_len;
 
@@ -116,13 +122,21 @@ struct tiny_audio_device {
     bool mic_mute;
 };
 
+struct tiny_pcm_out {
+
+    struct pcm_config config;
+    struct pcm *pcm;
+
+    int card;
+    int device;
+};
+
 struct tiny_stream_out {
     struct audio_stream_out stream;
 
     struct tiny_audio_device *adev;
 
-    struct pcm_config config;
-    struct pcm *pcm;
+    struct tiny_pcm_out spcm[MAX_PCM_DEVICES];
 };
 
 #define MAX_PREPROCESSORS 10
@@ -215,19 +229,21 @@ static int out_set_format(struct audio_stream *stream, int format)
 static int out_standby(struct audio_stream *stream)
 {
     struct tiny_stream_out *out = (struct tiny_stream_out *)stream;
-    int ret;
+    int i, ret = 0;
 
-    if (out->pcm) {
-	LOGV("out_standby(%p) closing PCM\n", stream);
-	ret = pcm_close(out->pcm);
-	if (ret != 0) {
-	    LOGE("out_standby(%p) failed: %d\n", stream, ret);
-	    return ret;
-	}
-	out->pcm = NULL;
+    for (i = 0; i < MAX_PCM_DEVICES; i++) {
+        if (out->spcm[i].pcm) {
+            int err = pcm_close(out->spcm[i].pcm);
+            LOGV("out_standby(%p) closing PCM(%d)\n", stream, i);
+            if (err != 0) {
+                LOGE("out_standby(%p) PCM(%d) failed: %d\n", stream, i, err);
+                ret = err;
+            }
+            out->spcm[i].pcm = NULL;
+        }
     }
 
-    return 0;
+    return ret;
 }
 
 static int out_dump(const struct audio_stream *stream, int fd)
@@ -292,24 +308,51 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
                          size_t bytes)
 {
     struct tiny_stream_out *out = (struct tiny_stream_out *)stream;
-    int ret;
+    struct tiny_audio_device *adev = out->adev;
+    int i, ret, no_devs = 0;
+    int active[MAX_PCM_CARDS * MAX_PCM_DEVICES] = { 0 };
 
-    if (!out->pcm) {
-	LOGV("out_write(%p) opening PCM\n", stream);
-	out->pcm = pcm_open(0, 0, PCM_OUT | PCM_MMAP, &out->config);
+    for (i = 0; i < adev->num_dev_cfgs; i++)
+        if (adev->dev_cfgs[i].mask & AUDIO_DEVICE_OUT_ALL) {
+            int card = adev->dev_cfgs[i].card;
+            int dev  = adev->dev_cfgs[i].device;
+            if (adev->devices & adev->dev_cfgs[i].mask) {
+                active[card * MAX_PCM_DEVICES + dev] = 1;
+                no_devs++;
+            }
+        }
 
-	if (!pcm_is_ready(out->pcm)) {
-	    LOGE("Failed to open output PCM: %s", pcm_get_error(out->pcm));
-	    pcm_close(out->pcm);
-	    return -EBUSY;
-	}
+    if (no_devs != 1)
+        LOGE("out_write(%p) %d active devices, expect errors!\n", no_devs);
+
+    for (i = 0; i < MAX_PCM_DEVICES; i++) {
+        struct tiny_pcm_out *opcm = &out->spcm[i];
+        if (!active[i])
+            continue;
+
+        if (!opcm->pcm) {
+            LOGV("out_write(%p) opening PCM(%d), card,dev: %d,%d\n", stream, i,
+                 opcm->card, opcm->device);
+            opcm->pcm = pcm_open(opcm->card, opcm->device,
+                                 PCM_OUT | PCM_MMAP, &opcm->config);
+
+            if (!pcm_is_ready(opcm->pcm)) {
+                LOGE("Failed to open output PCM(%d): %s", i,
+                     pcm_get_error(opcm->pcm));
+                pcm_close(opcm->pcm);
+                return -EBUSY;
+            }
+        }
+
+        ret = pcm_mmap_write(opcm->pcm, buffer, bytes);
+        if (ret != 0) {
+            LOGE("out_write(%p) PCM(%d) failed: %d\n", stream, i, ret);
+            //break;
+        }
     }
 
-    ret = pcm_mmap_write(out->pcm, buffer, bytes);
-    if (ret != 0) {
-	LOGE("out_write(%p) failed: %d\n", stream, ret);
-	return ret;
-    }
+    if (ret != 0)
+        return ret;
 
     return bytes;
 }
@@ -418,7 +461,7 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
 {
     struct tiny_audio_device *adev = (struct tiny_audio_device *)dev;
     struct tiny_stream_out *out;
-    int ret;
+    int i, ret;
 
     out = calloc(1, sizeof(struct tiny_stream_out));
     if (!out)
@@ -457,11 +500,30 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
      * from those; should also support configuration from file and
      * buffer resizing.
      */
-    out->config.channels = 2;
-    out->config.rate = out_get_sample_rate(&out->stream.common);
-    out->config.period_count = 4;
-    out->config.period_size = 1024;
-    out->config.format = PCM_FORMAT_S16_LE;
+    for (i = 0; i < MAX_PCM_DEVICES; i++) {
+        out->spcm[i].config.channels = 2;
+        out->spcm[i].config.rate = out_get_sample_rate(&out->stream.common);
+        out->spcm[i].config.period_count = 4;
+        out->spcm[i].config.period_size = 1024;
+        out->spcm[i].config.format = PCM_FORMAT_S16_LE;
+    }
+
+    for (i = 0; i < adev->num_dev_cfgs; i++)
+	if (adev->dev_cfgs[i].mask & AUDIO_DEVICE_OUT_ALL) {
+            int card = adev->dev_cfgs[i].card;
+            int dev  = adev->dev_cfgs[i].device;
+
+            if (card >= MAX_PCM_CARDS || dev >= MAX_PCM_DEVICES) {
+                LOGV("invalid card,dev: %d,%d for 0x%x\n", card, dev,
+                     adev->dev_cfgs[i].mask);
+                continue;
+            }
+
+            out->spcm[card * MAX_PCM_DEVICES + dev].card   = card;
+            out->spcm[card * MAX_PCM_DEVICES + dev].device = dev;
+            LOGV("configuring cfg(%d) to card,dev: %d,%d for 0x%x\n",
+                    i, card, dev, adev->dev_cfgs[i].mask);
+        }
 
     LOGV("Opened output stream %p\n", out);
 
@@ -478,9 +540,13 @@ static void adev_close_output_stream(struct audio_hw_device *dev,
                                      struct audio_stream_out *stream)
 {
     struct tiny_stream_out *out = (struct tiny_stream_out *)stream;
-    LOGV("Closing output stream %p\n", stream);
-    if (out->pcm)
-	pcm_close(out->pcm);
+    int i;
+
+    for (i = 0; i < MAX_PCM_DEVICES; i++) {
+        LOGV("Closing output stream %p, PCM(%d)\n", stream, i);
+        if (out->spcm[i].pcm)
+            pcm_close(out->spcm[i].pcm);
+    }
     free(stream);
 }
 
@@ -656,6 +722,8 @@ static void adev_config_start(void *data, const XML_Char *elem,
     struct tiny_dev_cfg *dev_cfg;
     const XML_Char *name = NULL;
     const XML_Char *val = NULL;
+    const XML_Char *alsa_card = NULL;
+    const XML_Char *alsa_dev = NULL;
     unsigned int i, j;
 
     for (i = 0; attr[i]; i += 2) {
@@ -664,6 +732,12 @@ static void adev_config_start(void *data, const XML_Char *elem,
 
 	if (strcmp(attr[i], "val") == 0)
 	    val = attr[i + 1];
+
+	if (strcmp(attr[i], "alsa_card") == 0)
+	    alsa_card = attr[i + 1];
+
+	if (strcmp(attr[i], "alsa_device") == 0)
+	    alsa_dev = attr[i + 1];
     }
 
     if (strcmp(elem, "device") == 0) {
@@ -686,6 +760,11 @@ static void adev_config_start(void *data, const XML_Char *elem,
 		s->dev = &dev_cfg[s->adev->num_dev_cfgs];
 		memset(s->dev, 0, sizeof(*s->dev));
 		s->dev->mask = dev_names[i].mask;
+
+                if (alsa_card)
+                    s->dev->card = atoi(alsa_card);
+                if (alsa_dev)
+                    s->dev->device = atoi(alsa_dev);
 
 		s->adev->dev_cfgs = dev_cfg;
 		s->adev->num_dev_cfgs++;
