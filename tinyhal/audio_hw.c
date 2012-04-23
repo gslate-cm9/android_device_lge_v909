@@ -706,6 +706,7 @@ static const struct {
     { AUDIO_DEVICE_OUT_EARPIECE, "earpiece" },
     { AUDIO_DEVICE_OUT_ANLG_DOCK_HEADSET, "analog-dock" },
     { AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET, "digital-dock" },
+    { AUDIO_DEVICE_OUT_AUX_DIGITAL, "hdmi" },
 
     { AUDIO_DEVICE_IN_COMMUNICATION, "comms" },
     { AUDIO_DEVICE_IN_AMBIENT, "ambient" },
