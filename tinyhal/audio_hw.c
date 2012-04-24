@@ -366,7 +366,8 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
         }
 
     if (no_devs != 1)
-        LOGE("out_write(%p) %d active devices, expect errors!\n", no_devs);
+        LOGE("out_write(%p) %d active devices, expect errors!\n",
+             stream, no_devs);
 
     for (i = 0; i < MAX_PCM_DEVICES; i++) {
         struct tiny_pcm_out *opcm = &out->spcm[i];
