@@ -66,18 +66,22 @@
 <device name="headset">
   <path name="on">
      <ctl name="MIXINL IN1L Switch" val="1" />
+     <ctl name="IN1L PGA IN1LN Switch" val="1" />
   </path>
   <path name="off">
      <ctl name="MIXINL IN1L Switch" val="0" />
+     <ctl name="IN1L PGA IN1LN Switch" val="0" />
   </path>
 </device>
 
 <device name="builtin-mic">
   <path name="on">
      <ctl name="MIXINR IN1R Switch" val="1" />
+     <ctl name="IN1R PGA IN1RN Switch" val="1" />
   </path>
   <path name="off">
      <ctl name="MIXINR IN1R Switch" val="0" />
+     <ctl name="IN1R PGA IN1RN Switch" val="0" />
   </path>
 </device>
 
