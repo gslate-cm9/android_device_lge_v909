@@ -193,6 +193,49 @@ void select_devices(struct tiny_audio_device *adev)
     adev->active_devices = adev->devices;
 }
 
+
+static int check_input_parameters(uint32_t sample_rate, int format, int channel_count)
+{
+    if (format != AUDIO_FORMAT_PCM_16_BIT)
+        return -EINVAL;
+
+    if ((channel_count < 1) || (channel_count > 2))
+        return -EINVAL;
+
+    switch(sample_rate) {
+    /* case 8000: */
+    /* case 11025: */
+    /* case 16000: */
+    /* case 22050: */
+    /* case 24000: */
+    /* case 32000: */
+    case 44100:
+    /* case 48000: */
+        break;
+    default:
+        return -EINVAL;
+    }
+
+    return 0;
+}
+
+static size_t get_input_buffer_size(uint32_t sample_rate, int format,
+                                    int channel_count)
+{
+    size_t size;
+    size_t device_rate;
+
+    if (check_input_parameters(sample_rate, format, channel_count) != 0)
+        return 0;
+
+    /* take resampling into account and return the closest majoring
+    multiple of 16 frames, as audioflinger expects audio buffers to
+    be a multiple of 16 frames */
+    size = 1024;
+
+    return size * channel_count * sizeof(short);
+}
+
 static uint32_t out_get_sample_rate(const struct audio_stream *stream)
 {
     return 44100;
@@ -376,7 +419,9 @@ static int out_remove_audio_effect(const struct audio_stream *stream, effect_han
 /** audio_stream_in implementation **/
 static uint32_t in_get_sample_rate(const struct audio_stream *stream)
 {
-    return 8000;
+    struct tiny_stream_in *in = (struct tiny_stream_in *)stream;
+
+    return in->config.rate;
 }
 
 static int in_set_sample_rate(struct audio_stream *stream, uint32_t rate)
@@ -386,12 +431,22 @@ static int in_set_sample_rate(struct audio_stream *stream, uint32_t rate)
 
 static size_t in_get_buffer_size(const struct audio_stream *stream)
 {
-    return 320;
+    struct tiny_stream_in *in = (struct tiny_stream_in *)stream;
+
+    return get_input_buffer_size(in->config.rate,
+                                 AUDIO_FORMAT_PCM_16_BIT,
+                                 in->config.channels);
 }
 
 static uint32_t in_get_channels(const struct audio_stream *stream)
 {
-    return AUDIO_CHANNEL_IN_MONO;
+    struct tiny_stream_in *in = (struct tiny_stream_in *)stream;
+
+    if (in->config.channels == 1) {
+        return AUDIO_CHANNEL_IN_MONO;
+    } else {
+        return AUDIO_CHANNEL_IN_STEREO;
+    }
 }
 
 static int in_get_format(const struct audio_stream *stream)
@@ -406,7 +461,19 @@ static int in_set_format(struct audio_stream *stream, int format)
 
 static int in_standby(struct audio_stream *stream)
 {
-    return 0;
+    struct tiny_stream_in *in = (struct tiny_stream_in *)stream;
+    int ret = 0;
+
+    if (in->pcm) {
+        ret = pcm_close(in->pcm);
+        LOGV("in_standby(%p) closing PCM\n", stream);
+        if (ret != 0) {
+            LOGE("in_standby(%p) PCM failed: %d\n", stream, ret);
+        }
+        in->pcm = NULL;
+    }
+
+    return ret;
 }
 
 static int in_dump(const struct audio_stream *stream, int fd)
@@ -433,9 +500,28 @@ static int in_set_gain(struct audio_stream_in *stream, float gain)
 static ssize_t in_read(struct audio_stream_in *stream, void* buffer,
                        size_t bytes)
 {
-    /* XXX: fake timing for audio input */
-    usleep(bytes * 1000000 / audio_stream_frame_size(&stream->common) /
-           in_get_sample_rate(&stream->common));
+    int ret;
+    struct tiny_stream_in *in = (struct tiny_stream_in *)stream;
+
+    if (!in->pcm) {
+	LOGV("in_read(%p) opening PCM\n", stream);
+	in->pcm = pcm_open(0, 0, PCM_IN, &in->config);
+
+	if (!pcm_is_ready(in->pcm)) {
+	    LOGE("Failed to open input PCM: %s", pcm_get_error(in->pcm));
+	    pcm_close(in->pcm);
+	    return -EBUSY;
+	}
+	LOGV("in_read(%p) buffer sizes: android: %d, alsa: %d\n", stream,
+             bytes, pcm_get_buffer_size(in->pcm));
+    }
+
+    ret = pcm_read(in->pcm, buffer, bytes);
+    if (ret != 0) {
+	LOGE("in_read(%p) failed: %d\n", stream, ret);
+	return ret;
+    }
+
     return bytes;
 }
 
@@ -595,7 +681,12 @@ static size_t adev_get_input_buffer_size(const struct audio_hw_device *dev,
                                          uint32_t sample_rate, int format,
                                          int channel_count)
 {
-    return 320;
+    size_t size;
+
+    if (check_input_parameters(sample_rate, format, channel_count) != 0)
+        return 0;
+
+    return get_input_buffer_size(sample_rate, format, channel_count);
 }
 
 static int adev_open_input_stream(struct audio_hw_device *dev, uint32_t devices,
@@ -641,7 +732,7 @@ static int adev_open_input_stream(struct audio_hw_device *dev, uint32_t devices,
     in->config.channels = 2;
     in->config.rate = 44100;
     in->config.period_count = 4;
-    in->config.period_size = 320;
+    in->config.period_size = 1024;
     in->config.format = PCM_FORMAT_S16_LE;
 
     *stream_in = &in->stream;
