@@ -6,6 +6,8 @@
      <!-- Try to initialize the echo canceler to bypass -->
      <ctl name="Echo Cancel Bypass" val="1" />
 
+     <ctl name="Jack Function" val="5" />
+
      <!-- AIF1->DAC1 -->
      <ctl name="DAC1 Switch" val="1" />
      <ctl name="DAC1L Mixer AIF1.1 Switch" val="1" />
@@ -28,12 +30,14 @@
      <ctl name="IN1L PGA IN1LN Switch" val="0" />
      <ctl name="MIXINL IN1L Volume" val="1" />
      <ctl name="IN1L Switch" val="1" />
+     <ctl name="IN1L Volume" val="23" />
 
      <!-- IN1RN/P (main mic) -> IN1R PGA with +30dB -->
      <ctl name="IN1R PGA IN1RP Switch" val="0" />
      <ctl name="IN1R PGA IN1RN Switch" val="0" />
      <ctl name="MIXINR IN1R Volume" val="1" />
      <ctl name="IN1R Switch" val="1" />
+     <ctl name="IN1R Volume" val="23" />
 
      <!-- ADC -> AIF1 -->
      <ctl name="AIF1ADC1L Mixer ADC/DMIC Switch" val="1" />
