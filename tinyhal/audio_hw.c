@@ -163,6 +163,9 @@ struct tiny_stream_in {
     int16_t *proc_buf;
     size_t proc_buf_size;
     size_t proc_frames_in;
+    int16_t *ref_buf;
+    size_t ref_buf_size;
+    size_t ref_frames_in;
     int read_status;
 };
 
@@ -231,7 +234,8 @@ static size_t get_input_buffer_size(uint32_t sample_rate, int format,
     /* take resampling into account and return the closest majoring
     multiple of 16 frames, as audioflinger expects audio buffers to
     be a multiple of 16 frames */
-    size = 1024;
+    size = (1024 * sample_rate) / 44100;
+    size = ((size + 15) / 16) * 16;
 
     return size * channel_count * sizeof(short);
 }
@@ -422,7 +426,7 @@ static uint32_t in_get_sample_rate(const struct audio_stream *stream)
 {
     struct tiny_stream_in *in = (struct tiny_stream_in *)stream;
 
-    return in->config.rate;
+    return in->requested_rate;
 }
 
 static int in_set_sample_rate(struct audio_stream *stream, uint32_t rate)
@@ -434,7 +438,7 @@ static size_t in_get_buffer_size(const struct audio_stream *stream)
 {
     struct tiny_stream_in *in = (struct tiny_stream_in *)stream;
 
-    return get_input_buffer_size(in->config.rate,
+    return get_input_buffer_size(in->requested_rate,
                                  AUDIO_FORMAT_PCM_16_BIT,
                                  in->config.channels);
 }
@@ -498,11 +502,105 @@ static int in_set_gain(struct audio_stream_in *stream, float gain)
     return 0;
 }
 
+static int get_next_buffer(struct resampler_buffer_provider *buffer_provider,
+                                   struct resampler_buffer* buffer)
+{
+    struct tiny_stream_in *in;
+
+    if (buffer_provider == NULL || buffer == NULL)
+        return -EINVAL;
+
+    in = (struct tiny_stream_in *)((char *)buffer_provider -
+                                   offsetof(struct tiny_stream_in, buf_provider));
+
+    if (in->pcm == NULL) {
+        buffer->raw = NULL;
+        buffer->frame_count = 0;
+        in->read_status = -ENODEV;
+        return -ENODEV;
+    }
+
+    if (in->frames_in == 0) {
+        in->read_status = pcm_read(in->pcm,
+                                   (void*)in->buffer,
+                                   in->config.period_size *
+                                       audio_stream_frame_size(&in->stream.common));
+        if (in->read_status != 0) {
+            LOGE("get_next_buffer() pcm_read error %d", in->read_status);
+            buffer->raw = NULL;
+            buffer->frame_count = 0;
+            return in->read_status;
+        }
+        in->frames_in = in->config.period_size;
+    }
+
+    buffer->frame_count = (buffer->frame_count > in->frames_in) ?
+                                in->frames_in : buffer->frame_count;
+    buffer->i16 = in->buffer + (in->config.period_size - in->frames_in) *
+                                                in->config.channels;
+
+    return in->read_status;
+
+}
+
+static void release_buffer(struct resampler_buffer_provider *buffer_provider,
+                                  struct resampler_buffer* buffer)
+{
+    struct tiny_stream_in *in;
+
+    if (buffer_provider == NULL || buffer == NULL)
+        return;
+
+    in = (struct tiny_stream_in *)((char *)buffer_provider -
+                                   offsetof(struct tiny_stream_in, buf_provider));
+
+    in->frames_in -= buffer->frame_count;
+}
+
+/* read_frames() reads frames from kernel driver, down samples to capture rate
+ * if necessary and output the number of frames requested to the buffer specified */
+static ssize_t read_frames(struct tiny_stream_in *in, void *buffer, ssize_t frames)
+{
+    ssize_t frames_wr = 0;
+
+    while (frames_wr < frames) {
+        size_t frames_rd = frames - frames_wr;
+        if (in->resampler != NULL) {
+            in->resampler->resample_from_provider(in->resampler,
+                    (int16_t *)((char *)buffer +
+                            frames_wr * audio_stream_frame_size(&in->stream.common)),
+                    &frames_rd);
+        } else {
+            struct resampler_buffer buf = {
+                    { raw : NULL, },
+                    frame_count : frames_rd,
+            };
+            get_next_buffer(&in->buf_provider, &buf);
+            if (buf.raw != NULL) {
+                memcpy((char *)buffer +
+                           frames_wr * audio_stream_frame_size(&in->stream.common),
+                        buf.raw,
+                        buf.frame_count * audio_stream_frame_size(&in->stream.common));
+                frames_rd = buf.frame_count;
+            }
+            release_buffer(&in->buf_provider, &buf);
+        }
+        /* in->read_status is updated by getNextBuffer() also called by
+         * in->resampler->resample_from_provider() */
+        if (in->read_status != 0)
+            return in->read_status;
+
+        frames_wr += frames_rd;
+    }
+    return frames_wr;
+}
+
 static ssize_t in_read(struct audio_stream_in *stream, void* buffer,
                        size_t bytes)
 {
     int ret;
     struct tiny_stream_in *in = (struct tiny_stream_in *)stream;
+    size_t frames_rq = bytes / audio_stream_frame_size(&stream->common);
 
     if (!in->pcm) {
 	LOGV("in_read(%p) opening PCM\n", stream);
@@ -517,7 +615,10 @@ static ssize_t in_read(struct audio_stream_in *stream, void* buffer,
              bytes, pcm_get_buffer_size(in->pcm));
     }
 
-    ret = pcm_read(in->pcm, buffer, bytes);
+    if (in->resampler != NULL)
+        ret = read_frames(in, buffer, frames_rq);
+    else
+        ret = pcm_read(in->pcm, buffer, bytes);
     if (ret != 0) {
 	LOGE("in_read(%p) failed: %d\n", stream, ret);
 	return ret;
@@ -724,6 +825,8 @@ static int adev_open_input_stream(struct audio_hw_device *dev, uint32_t devices,
     in->stream.read = in_read;
     in->stream.get_input_frames_lost = in_get_input_frames_lost;
 
+    in->requested_rate = *sample_rate;
+
     pthread_mutex_lock(&adev->route_lock);
     adev->devices &= ~AUDIO_DEVICE_IN_ALL;
     adev->devices |= devices;
@@ -736,9 +839,35 @@ static int adev_open_input_stream(struct audio_hw_device *dev, uint32_t devices,
     in->config.period_size = 1024;
     in->config.format = PCM_FORMAT_S16_LE;
 
+    in->buffer = malloc(in->config.period_size *
+                        audio_stream_frame_size(&in->stream.common));
+    if (!in->buffer) {
+        ret = -ENOMEM;
+        goto err;
+    }
+
+    if (in->requested_rate != in->config.rate) {
+        in->buf_provider.get_next_buffer = get_next_buffer;
+        in->buf_provider.release_buffer = release_buffer;
+
+        ret = create_resampler(in->config.rate,
+                               in->requested_rate,
+                               in->config.channels,
+                               RESAMPLER_QUALITY_DEFAULT,
+                               &in->buf_provider,
+                               &in->resampler);
+        if (ret != 0) {
+            ret = -EINVAL;
+            goto err;
+        }
+    }
+
     *stream_in = &in->stream;
     return 0;
-
+err:
+    if (in->resampler)
+        release_resampler(in->resampler);
+    free(in->buffer);
 err_open:
     free(in);
     *stream_in = NULL;
@@ -752,6 +881,16 @@ static void adev_close_input_stream(struct audio_hw_device *dev,
 
     if (in->pcm)
 	pcm_close(in->pcm);
+
+    if (in->resampler) {
+        free(in->buffer);
+        release_resampler(in->resampler);
+    }
+    if (in->proc_buf)
+        free(in->proc_buf);
+    if (in->ref_buf)
+        free(in->ref_buf);
+
     free(in);
     return;
 }
