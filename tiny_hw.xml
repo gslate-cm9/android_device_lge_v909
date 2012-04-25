@@ -67,21 +67,29 @@
   <path name="on">
      <ctl name="MIXINL IN1L Switch" val="1" />
      <ctl name="IN1L PGA IN1LN Switch" val="1" />
+     <ctl name="AIF1ADCL Source" val="0" />
+     <ctl name="AIF1ADCR Source" val="0" />
   </path>
   <path name="off">
      <ctl name="MIXINL IN1L Switch" val="0" />
      <ctl name="IN1L PGA IN1LN Switch" val="0" />
+     <ctl name="AIF1ADCR Source" val="1" />
   </path>
 </device>
 
 <device name="builtin-mic">
   <path name="on">
+     <ctl name="Jack Function" val="0" />
      <ctl name="MIXINR IN1R Switch" val="1" />
      <ctl name="IN1R PGA IN1RN Switch" val="1" />
+     <ctl name="AIF1ADCL Source" val="1" />
+     <ctl name="AIF1ADCR Source" val="1" />
+     <ctl name="Jack Function" val="5" />
   </path>
   <path name="off">
      <ctl name="MIXINR IN1R Switch" val="0" />
      <ctl name="IN1R PGA IN1RN Switch" val="0" />
+     <ctl name="AIF1ADCL Source" val="0" />
   </path>
 </device>
 
