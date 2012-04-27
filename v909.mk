@@ -32,7 +32,7 @@ PRODUCT_COPY_FILES += \
      $(LOCAL_PATH)/tiny_hw.xml:/system/etc/sound/v909.xml
 
 PRODUCT_PROPERTY_OVERRIDES := \
-    wifi.interface=wlan0 \
+    wifi.interface=eth0 \
     wifi.supplicant_scan_interval=15
 
 PRODUCT_COPY_FILES += \
