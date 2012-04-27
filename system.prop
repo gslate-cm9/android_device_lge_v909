@@ -12,8 +12,6 @@ wifi.supplicant_scan_interval=15
 drm.service.enabled=1
 keyguard.no_require_sim=yes
 
-mobiledata.interfaces=gannet0,vsnet0,vsnet1,vsnet2,vsnet3
-
 # We can afford the 32m
 dalvik.vm.heapsize=32m
 
