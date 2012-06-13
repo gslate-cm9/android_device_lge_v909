@@ -1,0 +1,7 @@
+[
+ {
+   "repository": "android_kernel_lge_v909",
+   "target_path": "kernel/lge/v909",
+   "branch": "ics-unstable"
+ }
+]
