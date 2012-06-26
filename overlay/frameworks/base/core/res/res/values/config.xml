@@ -46,6 +46,9 @@
     <!-- If this is true, the screen will come on when you unplug usb/power/whatever. -->
     <bool name="config_unplugTurnsOnScreen">true</bool>
 
+    <!-- True will enable the electron beam screen-off animation. -->
+    <bool name="config_screenOffAnimation">false</bool>
+
     <!-- Enable datausage threshhold in the Settings -> Data usage menu -->
     <string name="config_datause_iface">ppp0</string>
 
