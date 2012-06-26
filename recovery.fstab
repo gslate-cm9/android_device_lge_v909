@@ -6,3 +6,4 @@
 /misc       emmc        /dev/block/mmcblk0p3
 /recovery   emmc        /dev/block/mmcblk0p5
 /system     ext4        /dev/block/mmcblk0p1
+/sdcard     datamedia   /dev/null
