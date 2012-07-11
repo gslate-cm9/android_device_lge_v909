@@ -57,7 +57,7 @@ public:
         reply.readInt32();
         return_string = String8(reply.readString16()).string();
 
-        LOGD("sendCommand(%s): return_string[%d][%s]", command, strlen(return_string), return_string);
+        ALOGD("sendCommand(%s): return_string[%d][%s]", command, strlen(return_string), return_string);
 
         return return_string;
     }

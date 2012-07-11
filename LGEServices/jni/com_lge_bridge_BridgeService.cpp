@@ -84,13 +84,13 @@ static char* getCurrentTime()
 
     if (fd < 0)
     {
-        LOGE("getCurrentTime(): /dev/rtc0 open error [%s]", strerror(errno));
+        ALOGE("getCurrentTime(): /dev/rtc0 open error [%s]", strerror(errno));
         return error;
     }
 
     if (ioctl(fd, RTC_RD_TIME, &rtc_tm) < 0)
     {
-        LOGE("getCurrentTime(): RTC_RD_TIME error");
+        ALOGE("getCurrentTime(): RTC_RD_TIME error");
         close(fd);
         return error;
     }
@@ -101,7 +101,7 @@ static char* getCurrentTime()
 
     memset(time_str, 0, 32);
     sprintf(time_str, "%c%d%c", (char)0x02, time, (char)0x03);
-    LOGD("getCurrentTime(): time = [%d], time_str = [%s]", time, time_str);
+    ALOGD("getCurrentTime(): time = [%d], time_str = [%s]", time, time_str);
 
     return time_str;
 }
@@ -187,14 +187,14 @@ static char* readDrmMemory()
     memset(memory, 0, 161);
     if (!read_misc_area(MISC_PAGE_SIZE * MISC_DRM_PAGE, 160, memory)) return error;
 
-    LOGD("readDrmMemory(): memory[%d][%s]", strlen(memory), memory);
+    ALOGD("readDrmMemory(): memory[%d][%s]", strlen(memory), memory);
 
     return memory;
 }
 
 static char* writeDrmMemory(char *memory)
 {
-    LOGD("writeDrmMemory(): memory[%d][%s]", strlen(memory), memory);
+    ALOGD("writeDrmMemory(): memory[%d][%s]", strlen(memory), memory);
 
     if (write_misc_area(MISC_PAGE_SIZE * MISC_DRM_PAGE, 160, memory)) return ok;
     else return error;
@@ -207,7 +207,7 @@ static char* getFactoryMode()
     memset(factory_mode, 0, 2);
     if (!read_misc_area(MISC_PAGE_SIZE * MISC_FACTORY_PAGE, 1, factory_mode)) return error;
 
-    LOGD("getFactoryMode(): factory_mode[%d][%s]", strlen(factory_mode), factory_mode);
+    ALOGD("getFactoryMode(): factory_mode[%d][%s]", strlen(factory_mode), factory_mode);
 
     if (factory_mode[0] != '1') factory_mode[0] = '0';
 
@@ -216,7 +216,7 @@ static char* getFactoryMode()
 
 static char* setFactoryMode(char *factory_mode)
 {
-    LOGD("setFactoryMode(): factory_mode[%d][%s]", strlen(factory_mode), factory_mode);
+    ALOGD("setFactoryMode(): factory_mode[%d][%s]", strlen(factory_mode), factory_mode);
 
     if (factory_mode == NULL || strlen(factory_mode) != 1 || (factory_mode[0] != '0' && factory_mode[0] != '1')) return error;
 
@@ -231,14 +231,14 @@ static char* getDeviceTestResultDetail()
     memset(device_test_result, 0, 241);
     if (!read_misc_area(MISC_PAGE_SIZE * MISC_FACTORY_PAGE + 2, 240, device_test_result)) return error;
 
-    LOGD("getDeviceTestResultDetail(): device_test_result[%d][%s]", strlen(device_test_result), device_test_result);
+    ALOGD("getDeviceTestResultDetail(): device_test_result[%d][%s]", strlen(device_test_result), device_test_result);
 
     return device_test_result;
 }
 
 static char* setDeviceTestResultDetail(char *device_test_result)
 {
-    LOGD("setDeviceTestResultDetail(): device_test_result[%d][%s]", strlen(device_test_result), device_test_result);
+    ALOGD("setDeviceTestResultDetail(): device_test_result[%d][%s]", strlen(device_test_result), device_test_result);
 
     if (device_test_result == NULL || strlen(device_test_result) != 240) return error;
 
@@ -253,7 +253,7 @@ static char* getDeviceTestResult()
     memset(device_test_result, 0, 2);
     if (!read_misc_area(MISC_PAGE_SIZE * MISC_FACTORY_PAGE + 1, 1, device_test_result)) return error;
 
-    LOGD("getDeviceTestResult(): device_test_result[%d][%s]", strlen(device_test_result), device_test_result);
+    ALOGD("getDeviceTestResult(): device_test_result[%d][%s]", strlen(device_test_result), device_test_result);
 
     if (device_test_result[0] != '1' && device_test_result[0] != '0') return error; // not tested yet
 
@@ -262,7 +262,7 @@ static char* getDeviceTestResult()
 
 static char* setDeviceTestResult(char *device_test_result)
 {
-    LOGD("setDeviceTestResult(): device_test_result[%d][%s]", strlen(device_test_result), device_test_result);
+    ALOGD("setDeviceTestResult(): device_test_result[%d][%s]", strlen(device_test_result), device_test_result);
 
     if (device_test_result == NULL || strlen(device_test_result) != 1 || (device_test_result[0] != '0' && device_test_result[0] != '1')) return error;
 
@@ -277,14 +277,14 @@ static char* readDir(char *dir_path)
 
     if (dir == NULL)
     {
-        LOGE("readDir(): dir_path[%s] exception[%s]", dir_path, strerror(errno));
+        ALOGE("readDir(): dir_path[%s] exception[%s]", dir_path, strerror(errno));
         return error;
     }
 
-    LOGI("readDir(): dir_path[%s]", dir_path);
+    ALOGI("readDir(): dir_path[%s]", dir_path);
     while ((entry = readdir(dir)) != NULL)
     {
-        LOGI("readDir(): d_name[%s] d_type[%d] d_reclen[%d] d_off[%lld] d_ino[%lld]",
+        ALOGI("readDir(): d_name[%s] d_type[%d] d_reclen[%d] d_off[%lld] d_ino[%lld]",
                             entry->d_name, entry->d_type, entry->d_reclen, entry->d_off, entry->d_ino);
     }
 
@@ -320,7 +320,7 @@ static int getSecureClockArea(char *event, int *offset, int *length)
 {
     int base = MISC_PAGE_SIZE * MISC_SECURECLOCK_PAGE;
 
-    LOGD("getSecureClockArea(): event[%s]", event);
+    ALOGD("getSecureClockArea(): event[%s]", event);
 
     if (event[3] == '1') base += 0; // oma
     else if (event[3] == '2') base += 128; // ms
@@ -332,7 +332,7 @@ static int getSecureClockArea(char *event, int *offset, int *length)
     else if (event[0] == '1' || event[0] == '2') { *offset = base + 64, *length = 32; } // offset
     else goto error;
 
-    LOGD("getSecureClockArea(): offset[%d], length[%d]", *offset, *length);
+    ALOGD("getSecureClockArea(): offset[%d], length[%d]", *offset, *length);
     return 1;
 
 error:
@@ -357,7 +357,7 @@ static char* getSecureClockValue(char *event) // event
         write_misc_area(offset, length, value);
     }
 
-    LOGD("getSecureClockValue(): event[%s], value[%s]", event, value);
+    ALOGD("getSecureClockValue(): event[%s], value[%s]", event, value);
 
     return value;
 }
@@ -413,12 +413,12 @@ static char* setSecureClockValue(char *args) // event,value
     ptr = strtok(buf, ",");
     if (ptr == NULL) return error;
     strncpy(event, ptr, 8);
-    LOGD("setSecureClockValue(): event[%s]", event);
+    ALOGD("setSecureClockValue(): event[%s]", event);
 
     ptr = strtok(NULL, ",");
     if (ptr == NULL) return error;
     strncpy(value, ptr, 32);
-    LOGD("setSecureClockValue(): value[%s]", value);
+    ALOGD("setSecureClockValue(): value[%s]", value);
 
     if (!getSecureClockArea(event, &offset, &length)) return error;
     if (!write_misc_area(offset, length, value)) return error;
@@ -444,7 +444,7 @@ static jstring sendNativeCommand(JNIEnv *env, jobject thiz, jstring _command)
         return env->NewString((const jchar *)error_str.string(), error_str.size());
     }
 
-    LOGD("sendNativeCommand(): command[%s]", command);
+    ALOGD("sendNativeCommand(): command[%s]", command);
 
     char *ret_val = "error";
 
@@ -489,7 +489,7 @@ static jstring sendNativeCommand(JNIEnv *env, jobject thiz, jstring _command)
     else if (strncmp(command, "setSmplCount", strlen("setSmplCount")) == 0)
         ret_val = setSmplCount((char *)(command + strlen("setSmplCount") + 1));
 
-    LOGD("sendNativeCommand(): returns[%d][%s]", strlen(ret_val), ret_val);
+    ALOGD("sendNativeCommand(): returns[%d][%s]", strlen(ret_val), ret_val);
 
     String16 ret_str(ret_val);
     return env->NewString((const jchar *)ret_str.string(), ret_str.size());
@@ -517,13 +517,13 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     jint result = -1;
 
     if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK) {
-        LOGE("ERROR: GetEnv failed\n");
+        ALOGE("ERROR: GetEnv failed\n");
         goto bail;
     }
     assert(env != NULL);
 
     if (register_com_lge_bridges_BridgeService(env) < 0) {
-        LOGE("ERROR: BridgeService native registration failed\n");
+        ALOGE("ERROR: BridgeService native registration failed\n");
         goto bail;
     }
 

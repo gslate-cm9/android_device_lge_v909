@@ -179,19 +179,19 @@ static bool getCurrentTime(int *time)
 
     if (fd < 0)
     {
-        LOGE("getCurrentTime(): /dev/rtc0 open error");
+        ALOGE("getCurrentTime(): /dev/rtc0 open error");
         return false;
     }
 
     if (ioctl(fd, RTC_RD_TIME, &rtc_tm) < 0)
     {
-        LOGE("getCurrentTime(): RTC_RD_TIME error");
+        ALOGE("getCurrentTime(): RTC_RD_TIME error");
         close(fd);
         return false;
     }
 
     rtc_tm_to_time(&rtc_tm, time);
-    LOGD("getCurrentTime(): *time = %d", *time);
+    ALOGD("getCurrentTime(): *time = %d", *time);
 
     close(fd);
 
@@ -374,7 +374,7 @@ extern "C" int DRM_ReadMemory(char *memory)
 //#endif
 //20101118, dh.choi@lge.com, use CP Secure Memory instead of MISC temporally [END]
 
-    LOGD("DRM_ReadMemory(): memory converted [%d][%s]", strlen(hex), hex);
+    ALOGD("DRM_ReadMemory(): memory converted [%d][%s]", strlen(hex), hex);
 
     for (i = 0, p = hex; i < 80; i++, p = p + 2)
     {
@@ -402,7 +402,7 @@ extern "C" int DRM_ReadHwKey(char *key)
     hex = (char *)android::gService->ReadHwKey(); // 160 bytes
     if (hex == NULL) return 0;
 
-    LOGD("DRM_ReadHwKey(): key converted [%d][%s]", strlen(hex), hex);
+    ALOGD("DRM_ReadHwKey(): key converted [%d][%s]", strlen(hex), hex);
 
     for (i = 0, p = hex; i < 32; i++, p = p + 2)
     {
@@ -438,7 +438,7 @@ extern "C" int DRM_WriteMemory(const char* memory)
         strcat(hex, buf);
     }
 
-    LOGD("DRM_WriteMemory(): memory converted [%d][%s]", strlen(hex), hex);
+    ALOGD("DRM_WriteMemory(): memory converted [%d][%s]", strlen(hex), hex);
 
 //#ifndef MISC_IO
     return android::gService->WriteDrmMemory(hex);

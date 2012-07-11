@@ -50,13 +50,13 @@ int main(int argc, char **argv)
     {
         result = ioctl(fd, 0, &diff_time); // ioctl to wait rtc event & get difference
 
-        LOGD("/dev/drm ioctl returns[%d]", result);
+        ALOGD("/dev/drm ioctl returns[%d]", result);
 
         if (result == 0) offset = -diff_time;
         else if (result == 1) offset = diff_time;
         else goto fail;
 
-        LOGD("RTC change event occur: offset = %ld", offset);
+        ALOGD("RTC change event occur: offset = %ld", offset);
 
         // gunwoo1.kim@lge.com, fix WBT#170373 [START]
         if (!SecureClock_RtcChanged(offset)) { close(fd); goto fail; }
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
     return 0;
 
 fail:
-    LOGE("exception occurs[%s], all secure clock invalidated", strerror(errno));
+    ALOGE("exception occurs[%s], all secure clock invalidated", strerror(errno));
 
     OMADRM_SecureClock_SetStatus(0);
     OMADRM_SecureClock_SetNtpStatus(0);
