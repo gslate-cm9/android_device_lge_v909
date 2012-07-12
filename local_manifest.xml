@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
-    <remote name="gslate-cm9"
-            fetch="git://github.com/gslate-cm9/"
-     />
-
-    <project path="kernel/lge/v909"
-        name="android_kernel_lge_v909"
-        revision="ics-unstable"
-        remote="gslate-cm9"
-     />
+  <project name="gslate-cm9/android_vendor_lge_v909" path="vendor/lge/v909" remote="github" revision="jellybean" />
+  <remote fetch="git://github.com/CyanogenMod/" name="CyanogenMod" review="review.cyanogenmod.com" />
+  <project name="CyanogenMod/android_device_lge_v909" path="device/lge/v909" remote="github" revision="jellybean" />
+  <project name="CyanogenMod/android_kernel_lge_v909" path="kernel/lge/v909" remote="github" revision="jellybean" />
 </manifest>
