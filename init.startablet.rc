@@ -4,9 +4,9 @@ on early-init
     mount debugfs debugfs /sys/kernel/debug
     write /sys/class/firmware/timeout 5
     # for backwards compatibility
-    export EXTERNAL_STORAGE /mnt/sdcard
-    mkdir /mnt/sdcard 0000 system system
-    symlink /mnt/sdcard /sdcard
+    export EXTERNAL_STORAGE /storage/sdcard0 
+    mkdir /storage/sdcard0 0000 system system
+    symlink /storage/sdcard0 /sdcard
     mkdir /usbdisk 0000 system system
     export EXTERNAL_STORAGE_UDISK /mnt/udisk
     mkdir /mnt/usbdisk 0000 system system
@@ -18,7 +18,7 @@ on fs
     mount ext4 /dev/block/mmcblk0p2 /cache wait noatime nosuid nodev
 
 on post-fs-data
-    # we will remap this as /mnt/sdcard with the sdcard fuse tool
+    # we will remap this as /storage/sdcard0 with the sdcard fuse tool
     mkdir /data/media 0775 media_rw media_rw
     chown media_rw media_rw /data/media
     # Set indication (checked by vold) that we have finished this action
@@ -192,7 +192,7 @@ service eta /system/bin/eta
     class late_start
 
 # bugreport is triggered by the VOLUME-DOWN and VOLUME-UP keys
-service bugreport /system/bin/dumpstate -d -v -o /mnt/sdcard/bugreports/bugreport
+service bugreport /system/bin/dumpstate -d -v -o /storage/sdcard0/bugreports/bugreport
     class late_start
     disabled
     oneshot
@@ -215,7 +215,7 @@ service clear-kernel-log /system/bin/clear-kernel-log
     disabled
     oneshot
 
-service logcat-main /system/bin/logcat -v time -b main -f /mnt/sdcard/logger/main.log -n 4 -r 4096
+service logcat-main /system/bin/logcat -v time -b main -f /storage/sdcard0/logger/main.log -n 4 -r 4096
     class late_start
     disabled
     oneshot
@@ -226,7 +226,7 @@ on property:persist.service.main.enable=1
 on property:persist.service.main.enable=0
     stop logcat-main
 
-service logcat-system /system/bin/logcat -v time -b system -f /mnt/sdcard/logger/system.log -n 4 -r 4096
+service logcat-system /system/bin/logcat -v time -b system -f /storage/sdcard0/logger/system.log -n 4 -r 4096
     class late_start
     disabled
     oneshot
@@ -237,7 +237,7 @@ on property:persist.service.system.enable=1
 on property:persist.service.system.enable=0
     stop logcat-system
 
-service logcat-radio /system/bin/logcat -v time -b radio -f /mnt/sdcard/logger/radio.log -n 4 -r 4096
+service logcat-radio /system/bin/logcat -v time -b radio -f /storage/sdcard0/logger/radio.log -n 4 -r 4096
     class late_start
     disabled
     oneshot
@@ -248,7 +248,7 @@ on property:persist.service.radio.enable=1
 on property:persist.service.radio.enable=0
     stop logcat-radio
 
-service logcat-events /system/bin/logcat -v time -b events -f /mnt/sdcard/logger/events.log -n 4 -r 4096
+service logcat-events /system/bin/logcat -v time -b events -f /storage/sdcard0/logger/events.log -n 4 -r 4096
     class late_start
     disabled
     oneshot
