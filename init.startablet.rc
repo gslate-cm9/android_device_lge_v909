@@ -8,6 +8,7 @@ on early-init
     mkdir /storage 0050 system sdcard_r
     mkdir /storage/sdcard0 0000 system system
     symlink /storage/sdcard0 /sdcard
+    symlink /storage/sdcard0 /mnt/sdcard
     mkdir /usbdisk 0000 system system
     export EXTERNAL_STORAGE_UDISK /mnt/udisk
     mkdir /mnt/usbdisk 0000 system system
