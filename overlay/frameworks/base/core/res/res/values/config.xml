@@ -51,10 +51,10 @@
 
     <!-- Values greater or equal to 0 will enable electronbeam screen-on
          animation with the specified delay (in milliseconds), -1 will disable the animation -->
-    <!-- <integer name="config_screenOnAnimation">-1</integer> -->
+    <integer name="config_screenOnAnimation">-1</integer>
 
     <!-- True will enable the electron beam screen-off animation. -->
-    <!-- <bool name="config_screenOffAnimation">false</bool> -->
+    <bool name="config_screenOffAnimation">false</bool>
 
     <!-- Enable datausage threshhold in the Settings -> Data usage menu -->
     <string name="config_datause_iface">ppp0</string>
