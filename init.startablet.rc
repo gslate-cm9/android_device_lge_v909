@@ -12,10 +12,7 @@ on early-init
     mkdir /mnt/usbdisk 0000 system system
     symlink /mnt/usbdisk /usbdisk
 on fs
-    mount ext4 /dev/block/mmcblk0p1 /system wait ro
-    setprop ro.crypto.tmpfs_options size=128m,mode=0771,uid=1000,gid=1000
-    mount ext4 /dev/block/mmcblk0p4 /data wait noatime nosuid nodev
-    mount ext4 /dev/block/mmcblk0p2 /cache wait noatime nosuid nodev
+    mount_all /fstab.v909
 
 on post-fs-data
     # we will remap this as /storage/sdcard0 with the sdcard fuse tool
