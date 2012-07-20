@@ -79,7 +79,10 @@ PRODUCT_PACKAGES += \
     libsecureclock \
     screencap \
     hwprops \
-    com.android.future.usb.accessory
+    com.android.future.usb.accessory \
+    e2fsck \
+    make_ext4fs \
+    setup_fs
 
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     persist.sys.usb.config=mtp
