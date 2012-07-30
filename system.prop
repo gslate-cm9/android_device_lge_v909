@@ -12,8 +12,8 @@ wifi.supplicant_scan_interval=15
 drm.service.enabled=1
 keyguard.no_require_sim=yes
 
-# We can afford the 32m
-dalvik.vm.heapsize=32m
+# We can afford the 64m
+dalvik.vm.heapsize=64m
 
 # hold precise GC data, and use SMP
 dalvik.vm.dexopt-flags=m=y,u=n
