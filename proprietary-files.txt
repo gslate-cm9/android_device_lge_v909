@@ -69,6 +69,7 @@ lib/egl/libGLES_android.so
 lib/egl/libEGL_tegra.so
 lib/egl/libGLESv1_CM_tegra.so
 lib/egl/libGLESv2_tegra.so
+lib/hw/camera.tegra.so
 lib/hw/gralloc.tegra.so
 lib/hw/hwcomposer.tegra.so
 lib/libEGL.so
