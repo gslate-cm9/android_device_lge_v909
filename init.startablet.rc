@@ -197,7 +197,7 @@ service lgesystemd /system/bin/lgesystemd
 service eventd /system/bin/eventd
     class late_start
 # eta deamon (tmus only)
-service eta /system/bin/eta
+service eta /system/bin/etalog
     class late_start
 
 # bugreport is triggered by the VOLUME-DOWN and VOLUME-UP keys
