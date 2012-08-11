@@ -74,6 +74,8 @@ TARGET_KERNEL_CONFIG := cyanogenmod_startablet_defconfig
 
 BOARD_UMS_LUNFILE := /sys/devices/platform/usb_mass_storage/lun0/file
 
+BOARD_USES_HC_RADIO := true
+
 # Wifi related defines
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
