@@ -6,7 +6,6 @@ bin/brcm_patchram_plus_lge
 bin/bluetoothd
 bin/bluetoothhiddend
 bin/drmserver
-bin/etalog
 bin/eventd
 bin/lg_calibration
 bin/lg_check_cal_pass
@@ -41,8 +40,6 @@ lib/drm/libdrmwvmplugin.so
 lib/libdrm1.so
 lib/libdrm1_jni.so
 lib/liblgerft.so
-lib/libreference-ril.so
-lib/libril.so
 framework/com.tmus.gslate.apps.jar
 bin/tegrastats
 etc/firmware/nvmm_aacdec.axf
@@ -65,17 +62,11 @@ etc/firmware/nvmm_wmadec.axf
 etc/firmware/nvmm_wmaprodec.axf
 etc/firmware/nvrm_avp.bin
 lib/egl/libEGL_tegra.so
-lib/egl/libGLES_android.so
-lib/egl/libEGL_tegra.so
 lib/egl/libGLESv1_CM_tegra.so
 lib/egl/libGLESv2_tegra.so
 lib/hw/camera.tegra.so
 lib/hw/gralloc.tegra.so
 lib/hw/hwcomposer.tegra.so
-lib/libEGL.so
-lib/libGLESv1_CM.so
-lib/libGLESv2.so
-lib/libGLESv2_dbg.so
 lib/libardrv_dynamic.so
 lib/libcgdrv.so
 lib/libnvapputil.so
