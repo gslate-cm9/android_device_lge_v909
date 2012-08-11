@@ -9,6 +9,10 @@ DEVICE_PACKAGE_OVERLAYS += device/lge/v909/overlay
 
 $(call inherit-product-if-exists, hardware/broadcom/wlan/bcmdhd/firmware/bcm4329/device-bcm.mk)
 
+# media codec config xml file
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/media_codecs.xml:system/etc/media_codecs.xml
+
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/media_profiles.xml:system/etc/media_profiles.xml \
     $(LOCAL_PATH)/egl.cfg:system/lib/egl/egl.cfg \
