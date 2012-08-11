@@ -197,8 +197,12 @@ void select_devices(struct tiny_audio_device *adev)
 }
 
 
-static int check_input_parameters(uint32_t sample_rate, int format, int channel_count)
+static int check_input_parameters(const struct audio_config *config)
 {
+    uint32_t sample_rate  = config->sample_rate;
+    audio_format_t format = config->format;
+    int channel_count     = popcount(config->channel_mask);
+
     if (format != AUDIO_FORMAT_PCM_16_BIT)
         return -EINVAL;
 
@@ -222,22 +226,21 @@ static int check_input_parameters(uint32_t sample_rate, int format, int channel_
     return 0;
 }
 
-static size_t get_input_buffer_size(uint32_t sample_rate, int format,
-                                    int channel_count)
+static size_t get_input_buffer_size( const struct audio_config *config)
 {
     size_t size;
     size_t device_rate;
 
-    if (check_input_parameters(sample_rate, format, channel_count) != 0)
+    if (check_input_parameters(config) != 0)
         return 0;
 
     /* take resampling into account and return the closest majoring
     multiple of 16 frames, as audioflinger expects audio buffers to
     be a multiple of 16 frames */
-    size = (1024 * sample_rate) / 44100;
+    size = (1024 * config->sample_rate) / 44100;
     size = ((size + 15) / 16) * 16;
 
-    return size * channel_count * sizeof(short);
+    return size * popcount(config->channel_mask) * sizeof(short);
 }
 
 static uint32_t out_get_sample_rate(const struct audio_stream *stream)
@@ -263,12 +266,12 @@ static uint32_t out_get_channels(const struct audio_stream *stream)
     return AUDIO_CHANNEL_OUT_STEREO;
 }
 
-static int out_get_format(const struct audio_stream *stream)
+static audio_format_t out_get_format(const struct audio_stream *stream)
 {
     return AUDIO_FORMAT_PCM_16_BIT;
 }
 
-static int out_set_format(struct audio_stream *stream, int format)
+static int out_set_format(struct audio_stream *stream, audio_format_t format)
 {
     return 0;
 }
@@ -421,6 +424,12 @@ static int out_remove_audio_effect(const struct audio_stream *stream, effect_han
     return 0;
 }
 
+static int out_get_next_write_timestamp(const struct audio_stream_out *stream,
+                                        int64_t *timestamp)
+{
+    return -EINVAL;
+}
+
 /** audio_stream_in implementation **/
 static uint32_t in_get_sample_rate(const struct audio_stream *stream)
 {
@@ -437,10 +446,13 @@ static int in_set_sample_rate(struct audio_stream *stream, uint32_t rate)
 static size_t in_get_buffer_size(const struct audio_stream *stream)
 {
     struct tiny_stream_in *in = (struct tiny_stream_in *)stream;
+    struct audio_config config;
 
-    return get_input_buffer_size(in->requested_rate,
-                                 AUDIO_FORMAT_PCM_16_BIT,
-                                 in->config.channels);
+    config.sample_rate  = in->requested_rate;
+    config.format       = AUDIO_FORMAT_PCM_16_BIT;
+    config.channel_mask = (in->config.channels == 2) ? AUDIO_CHANNEL_IN_STEREO : AUDIO_CHANNEL_IN_MONO;
+
+    return get_input_buffer_size(&config);
 }
 
 static uint32_t in_get_channels(const struct audio_stream *stream)
@@ -454,12 +466,12 @@ static uint32_t in_get_channels(const struct audio_stream *stream)
     }
 }
 
-static int in_get_format(const struct audio_stream *stream)
+static audio_format_t in_get_format(const struct audio_stream *stream)
 {
     return AUDIO_FORMAT_PCM_16_BIT;
 }
 
-static int in_set_format(struct audio_stream *stream, int format)
+static int in_set_format(struct audio_stream *stream, audio_format_t format)
 {
     return 0;
 }
@@ -643,8 +655,10 @@ static int in_remove_audio_effect(const struct audio_stream *stream, effect_hand
 }
 
 static int adev_open_output_stream(struct audio_hw_device *dev,
-                                   uint32_t devices, int *format,
-                                   uint32_t *channels, uint32_t *sample_rate,
+                                   audio_io_handle_t handle,
+                                   audio_devices_t devices,
+                                   audio_output_flags_t flags,
+                                   struct audio_config *config,
                                    struct audio_stream_out **stream_out)
 {
     struct tiny_audio_device *adev = (struct tiny_audio_device *)dev;
@@ -671,6 +685,7 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
     out->stream.set_volume = out_set_volume;
     out->stream.write = out_write;
     out->stream.get_render_position = out_get_render_position;
+    out->stream.get_next_write_timestamp = out_get_next_write_timestamp;
 
     out->adev = adev;
 
@@ -679,10 +694,6 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
     adev->devices |= devices;
     select_devices(adev);
     pthread_mutex_unlock(&adev->route_lock);
-
-    *channels = out_get_channels(&out->stream.common);
-    *format = out_get_format(&out->stream.common);
-    *sample_rate = out_get_sample_rate(&out->stream.common);
 
     /* Should query the driver for parameters and compute defaults
      * from those; should also support configuration from file and
@@ -764,6 +775,12 @@ static int adev_set_master_volume(struct audio_hw_device *dev, float volume)
     return -ENOSYS;
 }
 
+static int adev_get_master_volume(struct audio_hw_device *dev,
+                                  float *volume)
+{
+    return -ENOSYS;
+}
+
 static int adev_set_mode(struct audio_hw_device *dev, int mode)
 {
     return 0;
@@ -780,32 +797,27 @@ static int adev_get_mic_mute(const struct audio_hw_device *dev, bool *state)
 }
 
 static size_t adev_get_input_buffer_size(const struct audio_hw_device *dev,
-                                         uint32_t sample_rate, int format,
-                                         int channel_count)
+                                         const struct audio_config *config)
 {
     size_t size;
 
-    if (check_input_parameters(sample_rate, format, channel_count) != 0)
+    if (check_input_parameters(config) != 0)
         return 0;
 
-    return get_input_buffer_size(sample_rate, format, channel_count);
+    return get_input_buffer_size(config);
 }
 
-static int adev_open_input_stream(struct audio_hw_device *dev, uint32_t devices,
-                                  int *format, uint32_t *channels,
-                                  uint32_t *sample_rate,
-                                  audio_in_acoustics_t acoustics,
+static int adev_open_input_stream(struct audio_hw_device *dev,
+                                  audio_io_handle_t handle,
+                                  audio_devices_t devices,
+                                  struct audio_config *config,
                                   struct audio_stream_in **stream_in)
 {
     struct tiny_audio_device *adev = (struct tiny_audio_device *)dev;
     struct tiny_stream_in *in;
     int ret;
-    int channel_count;
 
-    *channels = AUDIO_CHANNEL_IN_STEREO;
-    channel_count = popcount(*channels);
-
-    if (check_input_parameters(*sample_rate, *format, channel_count) != 0)
+    if (check_input_parameters(config) != 0)
         return -EINVAL;
 
     in = calloc(1, sizeof(struct tiny_stream_in));
@@ -830,8 +842,6 @@ static int adev_open_input_stream(struct audio_hw_device *dev, uint32_t devices,
     in->stream.set_gain = in_set_gain;
     in->stream.read = in_read;
     in->stream.get_input_frames_lost = in_get_input_frames_lost;
-
-    in->requested_rate = *sample_rate;
 
     pthread_mutex_lock(&adev->route_lock);
     adev->devices &= ~AUDIO_DEVICE_IN_ALL;
@@ -1178,7 +1188,7 @@ static int adev_open(const hw_module_t* module, const char* name,
         return -ENOMEM;
 
     adev->device.common.tag = HARDWARE_DEVICE_TAG;
-    adev->device.common.version = 0;
+    adev->device.common.version = AUDIO_DEVICE_API_VERSION_1_0;
     adev->device.common.module = (struct hw_module_t *) module;
     adev->device.common.close = adev_close;
 
@@ -1186,6 +1196,7 @@ static int adev_open(const hw_module_t* module, const char* name,
     adev->device.init_check = adev_init_check;
     adev->device.set_voice_volume = adev_set_voice_volume;
     adev->device.set_master_volume = adev_set_master_volume;
+    adev->device.get_master_volume = adev_get_master_volume;
     adev->device.set_mode = adev_set_mode;
     adev->device.set_mic_mute = adev_set_mic_mute;
     adev->device.get_mic_mute = adev_get_mic_mute;
@@ -1231,8 +1242,8 @@ static struct hw_module_methods_t hal_module_methods = {
 struct audio_module HAL_MODULE_INFO_SYM = {
     .common = {
         .tag = HARDWARE_MODULE_TAG,
-        .version_major = 1,
-        .version_minor = 0,
+        .module_api_version = AUDIO_MODULE_API_VERSION_0_1,
+        .hal_api_version = HARDWARE_HAL_API_VERSION,
         .id = AUDIO_HARDWARE_MODULE_ID,
         .name = "TinyHAL",
         .author = "Mark Brown <broonie@opensource.wolfsonmicro.com>",
