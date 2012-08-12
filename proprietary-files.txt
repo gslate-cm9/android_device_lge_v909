@@ -1,4 +1,3 @@
-bin/am
 bin/bdaddr_init
 bin/bmgr
 bin/brcm_patchram_plus
@@ -17,7 +16,6 @@ bin/lg_init_calibration
 bin/motion
 bin/nv_hciattach
 bin/nvtest
-bin/omx_tests
 bin/pppd
 bin/RescueServer
 bin/RescueStarter
