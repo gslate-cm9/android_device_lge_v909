@@ -91,6 +91,9 @@ PRODUCT_PACKAGES += \
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     persist.sys.usb.config=mtp
 
+# Inherit tablet dalvik settings
+$(call inherit-product, frameworks/native/build/tablet-dalvik-heap.mk)
+
 PRODUCT_CHARACTERISTICS := tablet,nosdcard
 
 PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=0
