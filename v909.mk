@@ -34,6 +34,7 @@ PRODUCT_COPY_FILES += \
      $(LOCAL_PATH)/gps.conf:system/etc/gps.conf
 
 PRODUCT_COPY_FILES += \
+     $(LOCAL_PATH)/audio_policy.conf::/system/etc/audio_policy.conf \
      $(LOCAL_PATH)/tiny_hw.xml:/system/etc/sound/v909.xml
 
 PRODUCT_PROPERTY_OVERRIDES := \
